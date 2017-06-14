@@ -1,0 +1,24 @@
+{
+  "name": "discovery-service",
+  "version": "1.0.0",
+  "description": "Discovery service that knows of the existence of all other micro services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesquare-avans/DiscoveryService.git"
+  },
+  "author": "Ruben Rutten <ruben@rubenrutten.nl>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thesquare-avans/DiscoveryService/issues"
+  },
+  "homepage": "https://github.com/thesquare-avans/DiscoveryService#readme",
+  "dependencies": {
+    "config": "^1.26.1",
+    "socket.io": "^2.0.3",
+    "uuid": "^3.0.1"
+  }
+}
