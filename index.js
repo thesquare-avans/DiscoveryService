@@ -1,10 +1,10 @@
+const config = require("config");
 const io = require("./lib/socketio");
 const servers = require("./servers");
-const uuid = require("uuid");
 
 // Poll for status every 60 seconds
 function getStatus() {
-	io.broadcastRequest(uuid(), "status", {})
+	io.broadcastRequest("status", {})
 	.then((responses) => {
 		responses.forEach((response) => {
 			servers[response.type][response.serviceId].status = response.data;
@@ -22,4 +22,4 @@ function getStatus() {
 }
 
 getStatus();
-setInterval(getStatus, 60000);
+setInterval(getStatus, config.get("statusInterval"));

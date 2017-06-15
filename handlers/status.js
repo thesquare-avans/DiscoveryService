@@ -1,7 +1,9 @@
 const servers = require("../servers");
 
 module.exports = (socket) => {
-	return (data) => {
+	return (data, ack) => {
+		if(!ack) ack = function () {};
+
 		var statusData = {};
 
 		Object.keys(servers).forEach((type) => {
@@ -31,9 +33,8 @@ module.exports = (socket) => {
 			}
 		});
 
-		socket.sign("statusCallback", {
+		socket.signAck(ack, {
 			success: true,
-			requestId: data.requestId,
 			status: statusData
 		});
 	};
