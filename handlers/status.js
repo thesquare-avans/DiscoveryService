@@ -2,8 +2,6 @@ const servers = require("../servers");
 
 module.exports = (socket) => {
 	return (data, ack) => {
-		if(!ack) ack = function () {};
-
 		var statusData = {};
 
 		Object.keys(servers).forEach((type) => {

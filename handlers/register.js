@@ -3,14 +3,12 @@ const integrity = require("../lib/integrity");
 
 module.exports = (socket) => {
 	return (data, ack) => {
-		if(!ack) ack = function () {};
-
 		if(!servers.hasOwnProperty(data.type)) {
-			return socket.signAck(ack, socket.signError("invalidType"));
+			return socket.signAck(ack, socket.errorBody("invalidType"));
 		}
 
 		if(servers[data.type].hasOwnProperty(data.id)) {
-			return socket.signAck(ack, socket.signError("alreadyExists"));
+			return socket.signAck(ack, socket.errorBody("alreadyExists"));
 		}
 
 		socket.serviceType = data.type;

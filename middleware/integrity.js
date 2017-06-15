@@ -49,11 +49,24 @@ function sign(socket) {
 	}
 
 	socket.signAck = (ack, data) => {
+		if(!ack) {
+			return;
+		}
+
 		if(!data) {
 			data = {};
 		}
 
 		ack(integrity.sign(data));
+	}
+
+	socket.errorBody = (err) => {
+		return {
+			success: false,
+			error: {
+				code: err
+			}
+		};
 	}
 }
 module.exports.sign = sign;
@@ -78,12 +91,7 @@ function verify(socket) {
 
 		if(typeof packet[2] == "function") {
 			handleErr = function (err) {
-				socket.signAck(packet[2], {
-					success: false,
-					error: {
-						code: err
-					}
-				});
+				socket.signAck(packet[2], socket.errorBody(err));
 			}
 		}
 
