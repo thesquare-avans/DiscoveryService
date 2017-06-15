@@ -1,89 +1,54 @@
-const servers = require("../servers");
+const io = require("../lib/socketio");
 
 module.exports = (socket) => {
-	return (data) => {
-		if(!data.type) {
-			return socket.sign("startCallback", {
-				success: false,
-				requestee: data.requestee,
-				error: {
-					code: "typeMissing"
-				}
-			});
-		}
-
+	return (data, ack) => {
 		if(!data.streamId) {
-			return socket.sign("startCallback", {
-				success: false,
-				requestee: data.requestee,
-				error: {
-					code: "streamIdMissing"
-				}
-			});
+			return socket.signAck(ack, socket.errorBody("streamIdMissing"));
 		}
 
 		if(!data.streamer) {
-			return socket.sign("startCallback", {
-				success: false,
-				requestee: data.requestee,
-				error: {
-					code: "streamerMissing"
-				}
-			});
+			return socket.signAck(ack, socket.errorBody("streamerMissing"));
 		}
 
-		var server;
+		Promise.all([io.leastStressedServer("chat"), io.leastStressedServer("streaming")])
+		.then((servers) => {
+			return Promise.all(servers.map((server) => {
+				return server.socket.sign("start", data, true)
+				.then((response) => {
+					//if(response.success) {
+						return Promise.resolve(response.data);
+					//}
 
-		switch(data.type) {
-			case "streaming":
-				if(Object.keys(servers['streaming']).length == 0) {
-					return socket.sign("startCallback", {
-						success: false,
-						requestee: data.requestee,
-						error: {
-							code: "streamingOffline"
-						}
-					});
-				}
-
-				var streamingServers = Object.keys(servers['streaming']);
-
-				server = servers['streaming'][streamingServers[Math.floor(Math.random() * streamingServers.length)]];
-			break;
-			case "chat":
-				if(Object.keys(servers['chat']).length == 0) {
-					return socket.sign("startCallback", {
-						success: false,
-						requestee: data.requestee,
-						error: {
-							code: "chatOffline"
-						}
-					});
-				}
-
-				var chatServers = Object.keys(servers['chat']);
-
-				server = servers['chat'][chatServers[Math.floor(Math.random() * chatServers.length)]];
-			break;
-			default:
-				return socket.sign("startCallback", {
-					success: false,
-					requestee: data.requestee,
-					error: {
-						code: "typeInvalid"
-					}
+					//return Promise.reject(response.error.code);
 				});
-		}
-
-		server.socket.request(data.requestee, "start", {
-			streamId: data.streamId,
-			streamer: data.streamer
+			}));
 		})
-		.then((serverData) => {
-			socket.sign("startCallback", {
+		.then((data) => {
+			return socket.signAck(ack, {
 				success: true,
-				server: serverData
+				data: {
+					chat: data[0],
+					streaming: data[1]
+				}
 			});
+		})
+		.catch((err) => {
+			if(typeof err == "string") {
+				switch(err) {
+					case "noServers":
+						return socket.signAck(ack, socket.errorBody("noServers"));
+					break;
+					case "timeout":
+						return socket.signAck(ack, socket.errorBody("nodeTimeout"));
+					break;
+					default:
+						console.error("[Handler/Start]", err);
+						return socket.signAck(ack, socket.errorBody("unknownError"));
+				}
+			}
+			
+			console.error("[Handler/Start]", err);
+			return socket.signAck(ack, socket.errorBody("unknownError"));
 		});
 	};
 };

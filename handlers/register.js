@@ -17,7 +17,8 @@ module.exports = (socket) => {
 		socket.registered = true;
 
 		servers[data.type][data.id] = {
-			socket: socket
+			socket: socket,
+			data: data
 		};
 
 		console.log("[Connect] "+socket.serviceType+"-server with ID "+socket.serviceId+" just registered");

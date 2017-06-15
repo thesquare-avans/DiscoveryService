@@ -7,12 +7,14 @@ function getStatus() {
 	io.broadcastRequest("status", {})
 	.then((responses) => {
 		responses.forEach((response) => {
-			servers[response.type][response.serviceId].status = response.data;
+			if(servers[response.type][response.serviceId]) {
+				servers[response.type][response.serviceId].status = response.data;
 
-			if(!response.success) {
-				servers[response.type][response.serviceId].status = {
-					status: "red"
-				};
+				if(!response.success) {
+					servers[response.type][response.serviceId].status = {
+						status: "red"
+					};
+				}
 			}
 		});
 	})
