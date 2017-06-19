@@ -15,11 +15,11 @@ module.exports = (socket) => {
 			return Promise.all(servers.map((server) => {
 				return server.socket.sign("start", data, true)
 				.then((response) => {
-					//if(response.success) {
+					if(response.success) {
 						return Promise.resolve(response.data);
-					//}
+					}
 
-					//return Promise.reject(response.error.code);
+					return Promise.reject(response.error.code);
 				});
 			}));
 		})

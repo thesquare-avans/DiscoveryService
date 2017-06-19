@@ -7,6 +7,7 @@ const integrityLib = require("./lib/integrity");
 var amountClients = 10;
 console.log(`Creating ${amountClients} fake clients`);
 
+/*
 for(var i = 0; i < amountClients; i++) {
 	var client = require("socket.io-client")("http://discovery.thesquare.dev.byteflock.com", {
 		forceNew: true
@@ -97,4 +98,74 @@ for(var i = 0; i < amountClients; i++) {
 	// client.verifiedOn("hello", function (data) {
 	// 	console.log(`Client ${client.serviceId} received "hello"`, data);
 	// });
-}
+}*/
+
+var client = require("socket.io-client")("http://discovery.thesquare.dev.byteflock.com", {
+	forceNew: true
+});
+
+	client.serviceId = "yolostreamer";
+	client.serviceType = "streaming";
+
+	client.on("connect", function () {
+		this.emit("register", integrityLib.sign({
+			type: this.serviceType,
+			id: this.serviceId
+		}), function (data) {
+			console.log(`Fake client of type ${this.serviceType} with ID ${this.serviceId} registered`);
+		});
+	});
+
+	client.verifiedOn = function (event, callback) {
+		this.on(event, (data, ack) => {
+			if(data.payload == undefined || data.signature == undefined) {
+				console.error("SOMETHING WENT WRONG", data);
+				return;
+			}
+
+			var verifiedData = integrityLib.verify(data.payload, data.signature);
+			if(!verifiedData) {
+				console.error("Packet with invalid signature");
+				return;
+			}
+
+			return callback(verifiedData, ack);
+		});
+	}.bind(client);
+
+	client.signAck = function (ack, data) {
+		if(!ack) {
+			return;
+		}
+
+		if(!data) {
+			data = {};
+		}
+
+		ack(integrityLib.sign(data));
+	}.bind(client);
+
+	client.verifiedOn("status", function (data, ack) {
+		this.signAck(ack, {
+			success: true,
+			data: {
+				status: "green",
+				streams: 0,
+				viewers: 0
+			}
+		});
+	}.bind(client));
+
+	client.verifiedOn("start", function (data, ack) {
+		this.signAck(ack, {
+			success: true,
+			data: {
+				hostname: "streamingswag.me",
+				id: this.serviceId
+			}
+		});
+	}.bind(client));
+
+setInterval(() => {
+	console.log("still alive");
+}, 60000);
