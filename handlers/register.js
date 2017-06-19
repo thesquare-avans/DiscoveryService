@@ -1,5 +1,6 @@
 const servers = require("../servers");
 const integrity = require("../lib/integrity");
+const debug = require("debug")("handler_register");
 
 module.exports = (socket) => {
 	return (data, ack) => {

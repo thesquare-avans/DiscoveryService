@@ -18,6 +18,7 @@
   "homepage": "https://github.com/thesquare-avans/DiscoveryService#readme",
   "dependencies": {
     "config": "^1.26.1",
+    "debug": "^2.6.8",
     "socket.io": "^2.0.3",
     "uuid": "^3.0.1"
   }

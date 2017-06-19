@@ -167,6 +167,11 @@ var client = require("socket.io-client")(config.get("discoveryServer"), {
 		});
 	}.bind(client));
 
-setInterval(() => {
-	console.log("still alive");
-}, 60000);
+	client.verifiedOn("stop", function (data, ack) {
+		this.signAck(ack, {
+			success: true,
+			data: {
+				satoshi: Math.random() * 4
+			}
+		});
+	}.bind(client));
