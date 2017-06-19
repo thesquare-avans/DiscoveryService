@@ -1,4 +1,5 @@
 const uuid = require("uuid/v4");
+const config = require("config");
 
 const integrity = require("./middleware/integrity");
 const integrityLib = require("./lib/integrity");
@@ -100,7 +101,7 @@ for(var i = 0; i < amountClients; i++) {
 	// });
 }*/
 
-var client = require("socket.io-client")("http://discovery.thesquare.dev.byteflock.com", {
+var client = require("socket.io-client")(config.get("discoveryServer"), {
 	forceNew: true
 });
 
