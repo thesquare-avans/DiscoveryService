@@ -26,6 +26,7 @@ module.exports = (socket) => {
 		socket.registered = true;
 
 		servers[data.type][data.id] = {
+			id: data.id,
 			socket: socket,
 			data: data
 		};
