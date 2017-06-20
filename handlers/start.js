@@ -1,15 +1,21 @@
 const io = require("../lib/socketio");
+const debug = require("debug")("handler_register");
 
 module.exports = (socket) => {
 	return (data, ack) => {
+		debug("received start request");
 		if(!data.streamId) {
+			console.log(data);
+			debug("streamId missing");
 			return socket.signAck(ack, socket.errorBody("streamIdMissing"));
 		}
 
 		if(!data.streamer) {
+			debug("streamer missing");
 			return socket.signAck(ack, socket.errorBody("streamerMissing"));
 		}
 
+		debug("getting available servers");
 		Promise.all([io.leastStressedServer("chat"), io.leastStressedServer("streaming")])
 		.then((servers) => {
 			return Promise.all(servers.map((server) => {
